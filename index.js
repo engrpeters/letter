@@ -1,7 +1,11 @@
 const usersUrl = "http://jsonplaceholder.typicode.com/users"
 const postsUrl = "http://jsonplaceholder.typicode.com/posts"
 
-const app = {
+let checkInteger = (i) => {
+    return typeof(i) === 'number'
+}
+
+ const app = {
 }
 
 /**
@@ -9,19 +13,22 @@ const app = {
  * @param {?number} userId A positive user id number
  */
 app.getUsersData = async (userId)=>{
+    if(userId && !checkInteger(userId)){
+        throw new Error('Expected userId to be a number')
+    }
     //If userId is supplied then fetch for a single user
-    var result = userId ? {} : [];
+    let result = userId ? {} : [];
     let url = userId? usersUrl + "/" + userId : usersUrl
     let userResponse = await fetch(url).then(app.handleErrors).catch((err)=>{
-        throw new Error();
+        throw new Error(err.message);
     })
     if(!userResponse || !userResponse.ok){
-        //An Error Occured
+        console.log(userResponse)
      
     }else{
         var userData = await userResponse.json()
         if(userData.length){
-            userData.forEach(async (element , index) => {
+            userData.forEach(async (element) => {
                 let userPosts = await app.getUsersPosts(element.id);
                 let letterObject = app.createUserLetter(element,userPosts);
                 result.push(letterObject)
@@ -33,9 +40,9 @@ app.getUsersData = async (userId)=>{
             Object.assign(result,letterObject);
         }
     }
+    console.log(result)
     return result
-   // return Promise.resolve(result)
-}
+  }
 /**
  * Create a user letter object by appending user's post to user's data
  * @param {<Object>} userData an object of user's data
@@ -44,12 +51,14 @@ app.getUsersData = async (userId)=>{
  */
 
 app.createUserLetter = (user,posts)=>{
-    //first we concatenate user address
+    if(!posts.length){
+      
+        throw new Error('Expected posts to be an array')
+    }
     let userData = user;
     let tmpPosts = posts;
     let tmpAdr = userData.address;
     userData.address = `${tmpAdr.street},${tmpAdr.suite}. ${tmpAdr.zipcode} ${tmpAdr.city}`
-    //then we append user's posts to their objects
     tmpPosts.forEach((el)=>{
         delete el.userId
     })
@@ -64,16 +73,17 @@ app.createUserLetter = (user,posts)=>{
  */
 
 app.getUsersPosts = async (userId,postId) => {
+    if(!checkInteger(userId) && !checkInteger(postId)){
+        throw new TypeError('Expected userId or post to be a number')
+    }
+
     let url = postId? postsUrl + "/" + postId : postsUrl;
     let searchParams = userId && !postId ?  new URLSearchParams({
         userId: userId
     }) : ''
-        let postsResponse = await fetch(url + "?" + searchParams).then(app.handleErrors).catch((err)=>{
-          
-        })
+        let postsResponse = await fetch(url + "?" + searchParams).then(app.handleErrors);
         if(!postsResponse || !postsResponse.ok){
-            //An error occured
-            throw new Error()
+            console.log(postsResponse)
         }else{
             let userPosts = await postsResponse.json()
             return userPosts
@@ -87,5 +97,4 @@ app.handleErrors = (response) =>{
     return response;
 }
 
-module.exports = app
-//export default app
+module.exports = app;

@@ -1,5 +1,5 @@
 import 'whatwg-fetch'
-import {describe, expect, jest, test} from '@jest/globals'
+import {describe, expect, test} from '@jest/globals'
 import app from './index.js'
 import * as mockData from './__mocks__/data.js'
 
@@ -12,18 +12,23 @@ describe("api unit tests",()=>{
         let data = await app.getUsersData(1)
         expect(data).toHaveProperty('id',1)
     })
-    
     test("get all users data",async () =>{
         let data = app.getUsersData()
-       // done()
-      expect(data).resolves.toEqual(expect.arrayContaining([expect.objectContaining({id:1})]))
-      expect(data).resolves.toEqual(expect.arrayContaining([expect.objectContaining({id:5})]))
+      expect(data).resolves.toEqual(expect.arrayContaining([{id:1}]))
+      expect(data).resolves.toEqual(expect.arrayContaining([{id:5}]))
        
+    })
+    test("should throw an error if invalid userId",async ()=>{
+       await expect(app.getUsersData('s')).rejects.toThrow()
     })
     test("get a single posts", async() =>{
         let data =  app.getUsersPosts(3);
-        expect(data).resolves.toEqual(expect.arrayContaining([expect.objectContaining({userId:3})]))
+        expect(data).resolves.toEqual(expect.arrayContaining([{'userId':3}]))
     })
+
+    test("should throw an error if both post id and user id are invalid",async ()=>{
+        await expect(app.getUsersPosts('s','tr')).rejects.toThrow()
+     })
 
     test("get a post by it's id", async() =>{
         let data =  app.getUsersPosts(null,3);
@@ -38,3 +43,23 @@ describe("api unit tests",()=>{
     })
     
 })
+
+describe('these tests should fail',()=>{
+  
+    test('get user with invalid parameter',async (done)=>{
+    //    expect.assertions(1)
+           await expect(app.getUsersData([])).resolves.toBeTruthy()    
+        
+    })
+
+    test('would not create user letter',()=>{
+      
+        expect(()=>{
+            app.createUserLetter(1,[{id:1}]);
+        }).not.toThrow()
+    })
+
+   
+    
+})
+
