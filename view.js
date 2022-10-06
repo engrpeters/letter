@@ -18,7 +18,7 @@ window.onload = async () => {
       const userElements = this.state.users.map((el) => {
         return (e(User, { key: el.id, user: el }))
       })
-   
+
       return (e('div', { className: 'users-data' }, userElements))
     }
   }

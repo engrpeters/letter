@@ -8,10 +8,10 @@ const app = {
 }
 /**
  * Returns all users, returns single user if user id passed to the function.
- * @param {?number} userId A positive user id number
+ * @param {?number | undefined | null} userId A positive user id number
+ *
  */
-app.getUsersData = async (userId) => {
-// console.log(userId)
+app.getUsersData = async (userId, userOnly) => {
   if (userId && !checkInteger(userId)) {
     throw new Error('Expected' + userId + 'to be a number')
   }
@@ -20,21 +20,25 @@ app.getUsersData = async (userId) => {
   const userResponse = await fetch(url).then(app.handleErrors).catch((err) => {
     throw new Error(err.message)
   })
+  console.log(userResponse)
   if (!userResponse || !userResponse.ok) {
-    console.log(userResponse)
+    console.log('There was an http error')
   } else {
     const userData = await userResponse.json()
-    console.log(userData)
-    if (userData.length) {
-      userData.forEach(async (element) => {
-        const userPosts = await app.getUsersPosts(element.id)
-        const letterObject = app.createUserLetter(element, userPosts)
-        result.push(letterObject)
-      })
+    if (userOnly) {
+      return userData
     } else {
-      const userPosts = await app.getUsersPosts(userData.id)
-      const letterObject = app.createUserLetter(userData, userPosts)
-      Object.assign(result, letterObject)
+      if (userData.length) {
+        userData.forEach(async (element) => {
+          const userPosts = await app.getUsersPosts(element.id)
+          const letterObject = app.createUserLetter(element, userPosts)
+          result.push(letterObject)
+        })
+      } else {
+        const userPosts = await app.getUsersPosts(userData.id)
+        const letterObject = app.createUserLetter(userData, userPosts)
+        Object.assign(result, letterObject)
+      }
     }
   }
 
