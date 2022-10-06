@@ -27,6 +27,10 @@ describe('api unit tests', () => {
   test('should throw an error if both post id and user id are invalid', async () => {
     await expect(app.getUsersPosts('s', 'tr')).rejects.toThrow()
   })
+  test('get a single user"s posts', () => {
+    const data = app.getUsersPosts(3)
+    expect(data).resolves.toEqual(expect.arrayContaining([expect.objectContaining({ title: expect.any(String) })]))
+  })
   test('get a post by it"s id', async () => {
     const data = app.getUsersPosts(null, 3)
     expect(data).resolves.toEqual(expect.objectContaining({ id: 3 }))

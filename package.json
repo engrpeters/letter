@@ -27,6 +27,8 @@
     "babel-jest": "^29.1.2",
     "jest-environment-jsdom": "^29.1.2",
     "jest-transform-stub": "^2.0.0",
+    "live-server": "^1.1.0",
+    "react-query": "^3.39.2",
     "ts-jest": "^29.0.3",
     "whatwg-fetch": "^3.6.2"
   }

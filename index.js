@@ -11,8 +11,9 @@ const app = {
  * @param {?number} userId A positive user id number
  */
 app.getUsersData = async (userId) => {
+// console.log(userId)
   if (userId && !checkInteger(userId)) {
-    throw new Error('Expected userId to be a number')
+    throw new Error('Expected' + userId + 'to be a number')
   }
   const result = userId ? {} : []
   const url = userId ? usersUrl + '/' + userId : usersUrl
@@ -23,6 +24,7 @@ app.getUsersData = async (userId) => {
     console.log(userResponse)
   } else {
     const userData = await userResponse.json()
+    console.log(userData)
     if (userData.length) {
       userData.forEach(async (element) => {
         const userPosts = await app.getUsersPosts(element.id)
@@ -35,7 +37,7 @@ app.getUsersData = async (userId) => {
       Object.assign(result, letterObject)
     }
   }
-  console.log(result)
+
   return result
 }
 /**
@@ -90,3 +92,5 @@ app.handleErrors = (response) => {
   }
   return response
 }
+
+export default app
