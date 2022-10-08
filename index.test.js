@@ -45,11 +45,11 @@ describe('api unit tests', () => {
 
 describe('these tests should fail', () => {
   test('get user with invalid parameter', async () => {
-    await expect(app.getUsersData([])).resolves.toBeTruthy()
+    await expect(app.getUsersData([])).rejects.toThrowError()
   })
-  test('would not create user letter', () => {
+  test('should not create user letter with invalid user object', () => {
     expect(() => {
       app.createUserLetter(1, [{ id: 1 }])
-    }).not.toThrow()
+    }).toThrow()
   })
 })
