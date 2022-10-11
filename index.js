@@ -15,29 +15,36 @@ app.getUsersData = async (userId, userOnly) => {
   if (userId && !checkInteger(userId)) {
     throw new Error('Expected' + userId + 'to be a number')
   }
+
   const result = userId ? {} : []
   const url = userId ? usersUrl + '/' + userId : usersUrl
-  const userResponse = await fetch(url).then(app.handleErrors).catch((err) => {
-    throw new Error(err.message)
-  })
-  console.log(userResponse)
+  const userResponse = await fetch(url).then(app.handleErrors)
+    .catch((err) => {
+      console.log(err)
+      throw new Error(err.message)
+    })
   if (!userResponse || !userResponse.ok) {
     console.log('There was an http error')
   } else {
     const userData = await userResponse.json()
+
     if (userOnly) {
       return userData
     } else {
       if (userData.length) {
-        userData.forEach(async (element) => {
-          const userPosts = await app.getUsersPosts(element.id)
-          const letterObject = app.createUserLetter(element, userPosts)
-          result.push(letterObject)
+        userData.forEach((element) => {
+          app.getUsersPosts(element.id).then((posts) => {
+            const letterObject = app.createUserLetter(element, posts)
+            result.push(letterObject)
+          })
+          return result
         })
+        return result
       } else {
         const userPosts = await app.getUsersPosts(userData.id)
         const letterObject = app.createUserLetter(userData, userPosts)
         Object.assign(result, letterObject)
+        return result
       }
     }
   }
@@ -57,11 +64,14 @@ app.createUserLetter = (user, posts) => {
   const userData = user
   const tmpPosts = posts
   const tmpAdr = userData.address
+  const tmpComp = userData.company
   userData.address = `${tmpAdr.street},${tmpAdr.suite}. ${tmpAdr.zipcode} ${tmpAdr.city}`
+  userData.company = tmpComp.name
   tmpPosts.forEach((el) => {
     delete el.userId
   })
   userData.posts = tmpPosts.slice()
+
   return userData
 }
 /**
@@ -70,12 +80,11 @@ app.createUserLetter = (user, posts) => {
  * @param {?number} userId A positive user id number
  * @param {?number} postId A positive post id number
  */
-
 app.getUsersPosts = async (userId, postId) => {
-  if (!checkInteger(userId) && !checkInteger(postId)) {
+  if ((userId && !checkInteger(userId)) && (postId && !checkInteger(postId))) {
     throw new TypeError('Expected userId or post to be a number')
   }
-  const url = postId ? postsUrl + '/ ' + postId : postsUrl
+  const url = postId ? postsUrl + '/' + postId : postsUrl
   const searchParams = (userId && !postId)
     ? (new URLSearchParams({
         userId
@@ -86,14 +95,16 @@ app.getUsersPosts = async (userId, postId) => {
     console.log(postsResponse)
   } else {
     const userPosts = await postsResponse.json()
+
     return userPosts
   }
 }
 
 app.handleErrors = (response) => {
-  if (!response.ok) {
+  if ((!response.ok && !response.json) || !response.ok) {
     throw Error(response.statusText)
   }
+
   return response
 }
 
