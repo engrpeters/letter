@@ -5,7 +5,7 @@ Playing around with Rest
 ## Install depedencies 
 ` npm install`
 
-##Serve HTML
+## Serve HTML
 ` npx serve `
 
 ## Run Test
